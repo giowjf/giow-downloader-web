@@ -1,54 +1,35 @@
 const API = "https://giow-downloader-api.onrender.com";
 
-async function analyze() {
+async function analyze(){
 
     const url = document.getElementById("url").value;
 
-    const response = await fetch(API + "/analyze", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
+    const res = await fetch(API + "/analyze",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
         },
-        body: JSON.stringify({ url: url })
+        body:JSON.stringify({url:url})
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    const select = document.getElementById("resolution");
+    if(data.error){
+        alert(data.error);
+        return;
+    }
 
-    select.innerHTML = "";
+    window.downloadLink = data.download;
 
-    data.resolutions.forEach(r => {
-        const option = document.createElement("option");
-        option.text = r;
-        select.add(option);
-    });
-
+    document.getElementById("status").innerText = "Pronto para download";
 }
 
-async function download() {
+async function download(){
 
-    const url = document.getElementById("url").value;
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-    const resolution = document.getElementById("resolution").value;
+    if(!window.downloadLink){
+        alert("Clique em analisar primeiro");
+        return;
+    }
 
-    const response = await fetch(API + "/download", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            url: url,
-            mode: mode,
-            resolution: resolution
-        })
-    });
-
-    const blob = await response.blob();
-
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "download";
-
-    a.click();
+    window.open(window.downloadLink,"_blank");
 }
