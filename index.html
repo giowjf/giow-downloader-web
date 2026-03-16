@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Giow Downloader</title>
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Giow Downloader</h1>
+
+<input id="url" placeholder="Cole o link do vídeo">
+
+<div class="options">
+
+<label>
+<input type="radio" name="mode" value="mp3" checked>
+MP3
+</label>
+
+<label>
+<input type="radio" name="mode" value="mp4">
+MP4
+</label>
+
+</div>
+
+<select id="resolution">
+<option>Qualidade mais alta</option>
+</select>
+
+<button onclick="analyze()">Analisar</button>
+
+<button onclick="download()">Baixar</button>
+
+<p id="status"></p>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
