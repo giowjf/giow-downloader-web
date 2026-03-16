@@ -1,71 +1,63 @@
-const API = "https://giow-downloader-api.onrender.com""
+const API = "https://giow-downloader-api.onrender.com";
 
 async function analyze(){
 
-let url = document.getElementById("url").value
+    let url = document.getElementById("url").value;
 
-let res = await fetch(API + "/analyze",{
+    let res = await fetch(API + "/analyze", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            url: url
+        })
+    });
 
-method:"POST",
-headers:{ "Content-Type":"application/json" },
+    let data = await res.json();
 
-body:JSON.stringify({
-url:url
-})
+    let select = document.getElementById("resolution");
 
-})
+    select.innerHTML = "";
 
-let data = await res.json()
+    data.resolutions.forEach(r => {
 
-let select = document.getElementById("resolution")
+        let opt = document.createElement("option");
+        opt.text = r;
+        select.add(opt);
 
-select.innerHTML=""
-
-data.resolutions.forEach(r=>{
-
-let opt=document.createElement("option")
-opt.text=r
-select.add(opt)
-
-})
-
-document.getElementById("status").innerText="Resoluções carregadas"
+    });
 
 }
 
 async function download(){
 
-let url=document.getElementById("url").value
-let mode=document.querySelector('input[name="mode"]:checked').value
-let resolution=document.getElementById("resolution").value
+    let url = document.getElementById("url").value;
+    let mode = document.querySelector('input[name="mode"]:checked').value;
+    let resolution = document.getElementById("resolution").value;
 
-let res = await fetch(API + "/download",{
+    let res = await fetch(API + "/download", {
 
-method:"POST",
+        method: "POST",
 
-headers:{
-"Content-Type":"application/json"
-},
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-body:JSON.stringify({
+        body: JSON.stringify({
+            url: url,
+            mode: mode,
+            resolution: resolution
+        })
 
-url:url,
-mode:mode,
-resolution:resolution
+    });
 
-})
+    let blob = await res.blob();
 
-})
+    let a = document.createElement("a");
 
-let blob = await res.blob()
+    a.href = URL.createObjectURL(blob);
+    a.download = "download";
 
-let a=document.createElement("a")
-
-a.href=URL.createObjectURL(blob)
-a.download="download"
-
-a.click()
-
-document.getElementById("status").innerText="Download iniciado"
-
+    a.click();
 }
