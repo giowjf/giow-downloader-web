@@ -26,10 +26,22 @@ async function analyze(){
 
 async function download(){
 
-    if(!window.downloadLink){
-        alert("Clique em analisar primeiro");
+    const url = document.getElementById("url").value;
+
+    const res = await fetch(API + "/download",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({url:url})
+    });
+
+    const data = await res.json();
+
+    if(data.error){
+        alert(data.error);
         return;
     }
 
-    window.open(window.downloadLink,"_blank");
+    window.open(API + "/" + data.file);
 }
