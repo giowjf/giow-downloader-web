@@ -1,4 +1,4 @@
-const API = "https://SEUAPP.onrender.com"
+const API = "https://giow-downloader-api.onrender.com""
 
 async function analyze(){
 
