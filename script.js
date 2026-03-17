@@ -36,12 +36,21 @@ async function download(){
         body:JSON.stringify({url:url})
     });
 
-    const data = await res.json();
-
-    if(data.error){
-        alert(data.error);
+    if(!res.ok){
+        alert("Erro no download");
         return;
     }
+
+    const blob = await res.blob();
+    const link = document.createElement("a");
+
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "video";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+}
 
     window.open(API + "/" + data.file);
 }
