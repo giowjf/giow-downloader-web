@@ -3,28 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GIOW Downloader</title>
+  <title>GIOW DOWNLOADER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="scanlines"></div>
   <div class="container">
     <header>
-      <h1>GIOW Downloader</h1>
-      <p>Cole o link de um vídeo do YouTube, Instagram ou outra rede social</p>
+      <div class="logo-wrap">
+        <div class="pixel-icon">▶</div>
+        <h1>GIOW<span class="blink">_</span></h1>
+      </div>
+      <p class="subtitle">&gt; DOWNLOADER v1.0 &lt;</p>
+      <p class="sub2">YOUTUBE · INSTAGRAM · TIKTOK</p>
     </header>
 
-    <div class="search-box">
-      <input
-        type="text"
-        id="url"
-        placeholder="https://www.youtube.com/watch?v=..."
-        autocomplete="off"
-        spellcheck="false"
-      />
-      <button id="analyzeBtn">Analisar</button>
+    <div class="panel">
+      <div class="panel-title">// INPUT URL</div>
+      <div class="search-box">
+        <input
+          type="text"
+          id="url"
+          placeholder="https://www.youtube.com/watch?v=..."
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <button id="analyzeBtn">[ SCAN ]</button>
+      </div>
     </div>
 
     <div id="result"></div>
+
+    <footer>
+      <span class="footer-txt">PRESS START TO DOWNLOAD</span>
+    </footer>
   </div>
 
   <script src="script.js"></script>

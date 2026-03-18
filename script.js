@@ -14,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") analyze();
   });
 
-  // Colar link automaticamente da área de transferência
   input.addEventListener("focus", async () => {
     if (input.value.trim()) return;
     try {
@@ -50,7 +49,7 @@ function badgeClass(ext) {
 function setLoading(isLoading) {
   const btn = document.getElementById("analyzeBtn");
   btn.disabled = isLoading;
-  btn.textContent = isLoading ? "Analisando..." : "Analisar";
+  btn.textContent = isLoading ? "[ ... ]" : "[ SCAN ]";
 }
 
 async function analyze() {
@@ -58,7 +57,7 @@ async function analyze() {
   const resultDiv = document.getElementById("result");
 
   if (!url) {
-    resultDiv.innerHTML = `<div class="error-box">Digite ou cole uma URL válida.</div>`;
+    resultDiv.innerHTML = `<div class="error-box">URL NAO ENCONTRADA. INSIRA UM LINK VALIDO.</div>`;
     return;
   }
 
@@ -66,8 +65,10 @@ async function analyze() {
   setLoading(true);
   resultDiv.innerHTML = `
     <div class="loading">
-      <div class="spinner"></div>
-      <p>Analisando o link...</p>
+      <div class="pixel-loader">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p>ANALISANDO...</p>
     </div>`;
 
   try {
@@ -80,14 +81,14 @@ async function analyze() {
     const data = await res.json();
 
     if (!res.ok || data.error) {
-      const msg = data.details || data.error || "Erro desconhecido";
-      resultDiv.innerHTML = `<div class="error-box"><strong>Erro:</strong> ${escapeHtml(msg)}</div>`;
+      const msg = data.details || data.error || "ERRO DESCONHECIDO";
+      resultDiv.innerHTML = `<div class="error-box">${escapeHtml(msg)}</div>`;
       return;
     }
 
     renderResult(data);
   } catch (err) {
-    resultDiv.innerHTML = `<div class="error-box"><strong>Falha de conexão.</strong> Verifique se a API está online.</div>`;
+    resultDiv.innerHTML = `<div class="error-box">FALHA DE CONEXAO. VERIFIQUE SE A API ESTA ONLINE.</div>`;
   } finally {
     setLoading(false);
   }
@@ -96,24 +97,24 @@ async function analyze() {
 function renderResult(data) {
   const resultDiv = document.getElementById("result");
   const duration = formatDuration(data.duration);
-  const uploader = data.uploader ? `· ${escapeHtml(data.uploader)}` : "";
-  const details = [duration, uploader].filter(Boolean).join(" ");
+  const uploader = data.uploader ? `[ ${escapeHtml(data.uploader)} ]` : "";
+  const details = [duration, uploader].filter(Boolean).join("  ");
 
   const formatsHtml = data.formats
     .map((f) => {
       const size = formatFilesize(f.filesize);
-      const fps = f.fps ? `${f.fps}fps` : "";
-      const label = [f.resolution, fps].filter(Boolean).join(" · ");
+      const fps = f.fps ? ` ${f.fps}FPS` : "";
+      const label = `${f.resolution || "AUTO"}${fps}`;
       const sizeHtml = size ? `<span class="format-size">${size}</span>` : "";
 
       return `
       <button class="format-btn" data-format-id="${escapeHtml(f.format_id)}" data-mode="${f.ext === "mp3" ? "mp3" : "mp4"}">
         <span class="format-label">
           <span class="format-badge ${badgeClass(f.ext)}">${f.ext.toUpperCase()}</span>
-          <span class="format-resolution">${escapeHtml(label || "auto")}</span>
+          <span class="format-resolution">${escapeHtml(label)}</span>
           ${sizeHtml}
         </span>
-        <span class="dl-icon">↓</span>
+        <span class="dl-icon">▼</span>
       </button>`;
     })
     .join("");
@@ -121,22 +122,19 @@ function renderResult(data) {
   resultDiv.innerHTML = `
     <div class="video-card">
       <div class="video-info">
-        ${data.thumbnail ? `<img class="video-thumb" src="${escapeHtml(data.thumbnail)}" alt="thumbnail" loading="lazy" />` : ""}
+        ${data.thumbnail ? `<img class="video-thumb" src="${escapeHtml(data.thumbnail)}" alt="thumb" loading="lazy" />` : ""}
         <div class="video-meta">
-          <div class="video-title">${escapeHtml(data.title || "Sem título")}</div>
+          <div class="video-title">${escapeHtml(data.title || "SEM TITULO")}</div>
           <div class="video-details">${details}</div>
         </div>
       </div>
-      <div class="formats-header">Escolha o formato</div>
+      <div class="formats-header">&gt;&gt; SELECT FORMAT TO DOWNLOAD</div>
       <div class="formats-list">${formatsHtml}</div>
     </div>`;
 
-  // Eventos de download
   resultDiv.querySelectorAll(".format-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const formatId = btn.dataset.formatId;
-      const mode = btn.dataset.mode;
-      startDownload(btn, formatId, mode);
+      startDownload(btn, btn.dataset.formatId, btn.dataset.mode);
     });
   });
 }
@@ -147,10 +145,7 @@ async function startDownload(btn, formatId, mode) {
 
   const original = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `
-    <span class="downloading-indicator">
-      <span class="dot"></span> Baixando...
-    </span>`;
+  btn.innerHTML = `<span class="downloading-indicator">▶ BAIXANDO...</span>`;
 
   try {
     const res = await fetch(`${API}/download`, {
@@ -161,7 +156,7 @@ async function startDownload(btn, formatId, mode) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      alert("Erro no download: " + (err.details || err.error || res.status));
+      alert("ERRO: " + (err.details || err.error || res.status));
       return;
     }
 
@@ -175,7 +170,7 @@ async function startDownload(btn, formatId, mode) {
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
   } catch (err) {
-    alert("Falha na conexão durante o download.");
+    alert("FALHA NA CONEXAO DURANTE O DOWNLOAD.");
   } finally {
     btn.innerHTML = original;
     btn.disabled = false;
