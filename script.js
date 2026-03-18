@@ -2,8 +2,11 @@ const API = "https://giow-downloader-api-windowless.onrender.com";
 
 let currentUrl = null;
 
-// 🔥 expõe global
-window.analyze = async function () {
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("analyzeBtn").addEventListener("click", analyze);
+});
+
+async function analyze() {
   const url = document.getElementById("url").value.trim();
   const resultDiv = document.getElementById("result");
 
@@ -36,7 +39,7 @@ window.analyze = async function () {
 
     data.formats.forEach(f => {
       html += `
-        <div class="format" onclick="download('${f.format_id}')">
+        <div class="format" data-format="${f.format_id}">
           ${f.ext} - ${f.resolution || "audio"}
         </div>
       `;
@@ -44,13 +47,19 @@ window.analyze = async function () {
 
     resultDiv.innerHTML = html;
 
+    // 🔥 adiciona eventos DEPOIS de renderizar
+    document.querySelectorAll(".format").forEach(el => {
+      el.addEventListener("click", () => {
+        download(el.dataset.format);
+      });
+    });
+
   } catch (err) {
     resultDiv.innerHTML = "Erro na requisição";
   }
-};
+}
 
-// 🔥 expõe global
-window.download = async function (format_id) {
+async function download(format_id) {
   if (!currentUrl) {
     alert("URL não definida");
     return;
@@ -85,4 +94,4 @@ window.download = async function (format_id) {
   } catch (err) {
     alert("Erro no download");
   }
-};
+}
