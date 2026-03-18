@@ -1,50 +1,32 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Giow Downloader</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GIOW Downloader</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-
   <div class="container">
+    <header>
+      <h1>GIOW Downloader</h1>
+      <p>Cole o link de um vídeo do YouTube, Instagram ou outra rede social</p>
+    </header>
 
-    <h1>Giow Downloader</h1>
-
-    <input id="url" placeholder="Cole o link do vídeo">
-
-    <div class="options">
-
-      <label>
-        <input type="radio" name="mode" value="mp3" checked>
-        MP3
-      </label>
-
-      <label>
-        <input type="radio" name="mode" value="mp4">
-        MP4
-      </label>
-
+    <div class="search-box">
+      <input
+        type="text"
+        id="url"
+        placeholder="https://www.youtube.com/watch?v=..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button id="analyzeBtn">Analisar</button>
     </div>
 
-    <select id="resolution">
-      <option>Qualidade mais alta</option>
-    </select>
-
-    <!-- ✅ botão correto -->
-    <button onclick="analyze()">Analisar</button>
-
-    <!-- ❌ REMOVIDO botão de download quebrado -->
-
     <div id="result"></div>
-
-    <p id="status"></p>
-
   </div>
 
   <script src="script.js"></script>
-
 </body>
 </html>
