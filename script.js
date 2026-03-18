@@ -70,7 +70,7 @@ async function download(){
         const link = document.createElement("a");
 
         link.href = window.URL.createObjectURL(blob);
-        link.download = "download";
+        link.download = (data.title || "video") + ".mp4";
 
         document.body.appendChild(link);
         link.click();
