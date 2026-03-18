@@ -1,5 +1,7 @@
 const API = "https://giow-downloader-api-windowless.onrender.com";
 
+let currentUrl = null; // 🔥 guarda globalmente
+
 async function analyze() {
   const url = document.getElementById("url").value.trim();
   const resultDiv = document.getElementById("result");
@@ -11,13 +13,15 @@ async function analyze() {
     return;
   }
 
+  currentUrl = url; // 🔥 salva aqui
+
   try {
     const res = await fetch(API + "/analyze", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ url }) // 🔥 simplificado
+      body: JSON.stringify({ url })
     });
 
     const data = await res.json();
@@ -31,7 +35,7 @@ async function analyze() {
 
     data.formats.forEach(f => {
       html += `
-        <div class="format" onclick="download('${encodeURIComponent(url)}', '${f.format_id}')">
+        <div class="format" onclick="download('${f.format_id}')">
           ${f.ext} - ${f.resolution || "audio"}
         </div>
       `;
@@ -44,8 +48,11 @@ async function analyze() {
   }
 }
 
-async function download(encodedUrl, format_id) {
-  const url = decodeURIComponent(encodedUrl);
+async function download(format_id) {
+  if (!currentUrl) {
+    alert("URL não definida");
+    return;
+  }
 
   try {
     const res = await fetch(API + "/download", {
@@ -54,7 +61,7 @@ async function download(encodedUrl, format_id) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        url,
+        url: currentUrl, // 🔥 sempre correto agora
         format_id,
         mode: "mp4"
       })
