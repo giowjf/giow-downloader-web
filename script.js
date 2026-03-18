@@ -1,87 +1,77 @@
 const API = "https://giow-downloader-api-windowless.onrender.com";
 
-async function analyze(){
+async function analyze() {
+  const url = document.getElementById("url").value.trim();
+  const resultDiv = document.getElementById("result");
 
-    const url = document.getElementById("url").value;
+  resultDiv.innerHTML = "Carregando...";
 
-    if(!url){
-        alert("Cole um link do YouTube");
-        return;
+  if (!url) {
+    resultDiv.innerHTML = "Digite uma URL";
+    return;
+  }
+
+  try {
+    const res = await fetch(API + "/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ url: url })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      resultDiv.innerHTML = "Erro: " + data.details;
+      return;
     }
 
-    document.getElementById("status").innerText = "Analisando vídeo...";
+    let html = `<h3>${data.title}</h3>`;
 
-    try{
+    data.formats.forEach(f => {
+      html += `
+        <div class="format" onclick="download('${url}', '${f.format_id}')">
+          ${f.ext} - ${f.resolution || "audio"}
+        </div>
+      `;
+    });
 
-        const res = await fetch(API + "/analyze",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({url:url})
-        });
+    resultDiv.innerHTML = html;
 
-        const data = await res.json();
-
-        if(data.error){
-            alert(data.error);
-            return;
-        }
-
-        document.getElementById("status").innerText =
-            "Vídeo encontrado: " + data.title;
-
-    }catch(err){
-
-        console.error(err);
-        alert("Erro ao analisar vídeo");
-
-    }
+  } catch (err) {
+    resultDiv.innerHTML = "Erro na requisição";
+  }
 }
 
+async function download(url, format_id) {
+  try {
+    const res = await fetch(API + "/download", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        url: url,
+        format_id: format_id,
+        mode: "mp4"
+      })
+    });
 
-async function download(){
-
-    const url = document.getElementById("url").value;
-
-    if(!url){
-        alert("Cole um link primeiro");
-        return;
+    if (!res.ok) {
+      const err = await res.json();
+      alert("Erro: " + err.details);
+      return;
     }
 
-    document.getElementById("status").innerText = "Baixando...";
+    const blob = await res.blob();
+    const link = document.createElement("a");
 
-    try{
+    link.href = window.URL.createObjectURL(blob);
+    link.download = "video.mp4";
+    link.click();
 
-        const res = await fetch(API + "/download",{
-            method:"POST",
-            headers:{
-                "Content-Type":"application/json"
-            },
-            body:JSON.stringify({url:url})
-        });
-
-        if(!res.ok){
-            throw new Error("Erro no download");
-        }
-
-        const blob = await res.blob();
-
-        const link = document.createElement("a");
-
-        link.href = window.URL.createObjectURL(blob);
-        link.download = (data.title || "video") + ".mp4";
-
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-
-        document.getElementById("status").innerText = "Download concluído";
-
-    }catch(err){
-
-        console.error(err);
-        alert("Erro ao baixar vídeo");
-
-    }
+  } catch (err) {
+    alert("Erro no download");
+  }
 }
