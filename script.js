@@ -17,13 +17,13 @@ async function analyze() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ url: url })
+      body: JSON.stringify({ url }) // 🔥 simplificado
     });
 
     const data = await res.json();
 
     if (data.error) {
-      resultDiv.innerHTML = "Erro: " + data.details;
+      resultDiv.innerHTML = "Erro: " + (data.details || data.error);
       return;
     }
 
@@ -31,7 +31,7 @@ async function analyze() {
 
     data.formats.forEach(f => {
       html += `
-        <div class="format" onclick="download('${url}', '${f.format_id}')">
+        <div class="format" onclick="download('${encodeURIComponent(url)}', '${f.format_id}')">
           ${f.ext} - ${f.resolution || "audio"}
         </div>
       `;
@@ -44,7 +44,9 @@ async function analyze() {
   }
 }
 
-async function download(url, format_id) {
+async function download(encodedUrl, format_id) {
+  const url = decodeURIComponent(encodedUrl);
+
   try {
     const res = await fetch(API + "/download", {
       method: "POST",
@@ -52,15 +54,15 @@ async function download(url, format_id) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        url: url,
-        format_id: format_id,
+        url,
+        format_id,
         mode: "mp4"
       })
     });
 
     if (!res.ok) {
       const err = await res.json();
-      alert("Erro: " + err.details);
+      alert("Erro: " + (err.details || err.error));
       return;
     }
 
