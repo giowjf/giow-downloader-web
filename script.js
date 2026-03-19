@@ -166,7 +166,23 @@ async function startDownload(btn, formatId, mode) {
 
   const original = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `<span class="downloading-indicator">▶ BAIXANDO...</span>`;
+
+  // Mostra barra de progresso 8-bit no botão
+  btn.innerHTML = `
+    <span class="progress-wrap">
+      <span class="progress-label">▶ BAIXANDO...</span>
+      <span class="progress-bar-outer">
+        <span class="progress-bar-fill" id="dl-progress-fill"></span>
+      </span>
+      <span class="progress-pct" id="dl-progress-pct">0%</span>
+    </span>`;
+
+  function setProgress(pct) {
+    const fill = document.getElementById("dl-progress-fill");
+    const label = document.getElementById("dl-progress-pct");
+    if (fill) fill.style.width = pct + "%";
+    if (label) label.textContent = Math.round(pct) + "%";
+  }
 
   try {
     const res = await fetch(`${API}/download`, {
@@ -181,7 +197,30 @@ async function startDownload(btn, formatId, mode) {
       return;
     }
 
-    const blob = await res.blob();
+    // Lê o stream com progresso
+    const contentLength = res.headers.get("Content-Length");
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    const reader = res.body.getReader();
+    const chunks = [];
+    let loaded = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      if (total > 0) {
+        setProgress((loaded / total) * 100);
+      } else {
+        // Sem Content-Length — pulsa entre 20% e 90% para indicar atividade
+        setProgress(20 + (Math.sin(Date.now() / 300) + 1) * 35);
+      }
+    }
+
+    setProgress(100);
+
+    // Monta o blob a partir dos chunks e dispara download
+    const blob = new Blob(chunks);
     const ext = mode === "mp3" ? "mp3" : "mp4";
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -190,6 +229,7 @@ async function startDownload(btn, formatId, mode) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
+
   } catch (err) {
     alert("FALHA NA CONEXAO DURANTE O DOWNLOAD.");
   } finally {
