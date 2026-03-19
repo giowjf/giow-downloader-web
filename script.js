@@ -2,6 +2,7 @@
 const API = "https://giow-downloader-api-windowless.onrender.com";
 
 let currentUrl = null;
+let currentClient = null;
 let downloading = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -102,6 +103,7 @@ async function analyze() {
     }
 
     renderResult(data);
+    currentClient = data.client_used || null;
   } catch (err) {
     resultDiv.innerHTML = `<div class="error-box">FALHA DE CONEXAO. VERIFIQUE SE A API ESTA ONLINE.</div>`;
   } finally {
@@ -122,15 +124,11 @@ function renderResult(data) {
       const label = `${f.resolution || "AUTO"}${fps}`;
       const sizeHtml = size ? `<span class="format-size">${size}</span>` : "";
 
-      // Monta format_id robusto: se for vídeo sem áudio (DASH), pede merge com melhor áudio
-      const isVideoOnly = f.ext !== "mp3" && f.acodec === "none";
-      const safeFormatId = isVideoOnly
-        ? `${f.format_id}+bestaudio[ext=m4a]/${f.format_id}+bestaudio/best[ext=mp4]/best`
-        : f.format_id;
-
+      // O backend monta o seletor de formato completo com fallbacks.
+      // Aqui passamos apenas o format_id puro para evitar conflito de seletores.
       return `
       <button class="format-btn"
-        data-format-id="${escapeHtml(safeFormatId)}"
+        data-format-id="${escapeHtml(f.format_id)}"
         data-mode="${f.ext === "mp3" ? "mp3" : "mp4"}">
         <span class="format-label">
           <span class="format-badge ${badgeClass(f.ext)}">${f.ext.toUpperCase()}</span>
@@ -174,7 +172,7 @@ async function startDownload(btn, formatId, mode) {
     const res = await fetch(`${API}/download`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: currentUrl, format_id: formatId, mode }),
+      body: JSON.stringify({ url: currentUrl, format_id: formatId, mode, preferred_client: currentClient }),
     });
 
     if (!res.ok) {
