@@ -3,6 +3,7 @@ const API = "https://giow-downloader-api-windowless.onrender.com";
 
 let currentUrl = null;
 let currentClient = null;
+let currentTitle = null;
 let downloading = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -198,9 +199,13 @@ async function startDownload(btn, formatId, mode) {
     // Dispara o download do arquivo
     const blob = new Blob(chunks);
     const ext = mode === "mp3" ? "mp3" : "mp4";
+    // Usa o título do vídeo como nome do arquivo — remove caracteres inválidos
+    const safeTitle = currentTitle
+      ? currentTitle.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, " ").trim().slice(0, 100)
+      : "video";
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `video.${ext}`;
+    a.download = `${safeTitle}.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -257,6 +262,7 @@ async function analyze() {
 
     renderResult(data);
     currentClient = data.client_used || null;
+    currentTitle = data.title || null;
   } catch (err) {
     resultDiv.innerHTML = `<div class="error-box">FALHA DE CONEXAO. VERIFIQUE SE A API ESTA ONLINE.</div>`;
   } finally {
