@@ -17,7 +17,6 @@
         <h1>GIOW<span class="blink">_</span></h1>
       </div>
       <p class="subtitle">&gt; DOWNLOADER v1.0 &lt;</p>
-      <p class="sub2">YOUTUBE · INSTAGRAM · TIKTOK</p>
     </header>
 
     <div class="panel">
@@ -42,5 +41,23 @@
   </div>
 
   <script src="script.js"></script>
+  <script>
+    // Botão scan: habilita/desabilita com classe .enabled
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("analyzeBtn");
+      const input = document.getElementById("url");
+
+      function updateBtn() {
+        if (input.value.trim().length > 0) {
+          btn.classList.add("enabled");
+        } else {
+          btn.classList.remove("enabled");
+        }
+      }
+
+      input.addEventListener("input", updateBtn);
+      updateBtn();
+    });
+  </script>
 </body>
 </html>
