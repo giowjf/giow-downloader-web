@@ -14,11 +14,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Enter") analyze();
   });
 
+  // Habilita/desabilita botão visualmente conforme input
+  function updateBtn() {
+    if (input.value.trim().length > 0) {
+      btn.classList.add("enabled");
+    } else {
+      btn.classList.remove("enabled");
+    }
+  }
+  input.addEventListener("input", updateBtn);
+  updateBtn();
+
   input.addEventListener("focus", async () => {
     if (input.value.trim()) return;
     try {
       const text = await navigator.clipboard.readText();
-      if (text.startsWith("http")) input.value = text;
+      if (text.startsWith("http")) {
+        input.value = text;
+        updateBtn();
+      }
     } catch (_) {}
   });
 });
@@ -53,7 +67,8 @@ function setLoading(isLoading) {
 }
 
 async function analyze() {
-  const url = document.getElementById("url").value.trim();
+  const input = document.getElementById("url");
+  const url = input.value.trim();
   const resultDiv = document.getElementById("result");
 
   if (!url) {
@@ -107,8 +122,16 @@ function renderResult(data) {
       const label = `${f.resolution || "AUTO"}${fps}`;
       const sizeHtml = size ? `<span class="format-size">${size}</span>` : "";
 
+      // Monta format_id robusto: se for vídeo sem áudio (DASH), pede merge com melhor áudio
+      const isVideoOnly = f.ext !== "mp3" && f.acodec === "none";
+      const safeFormatId = isVideoOnly
+        ? `${f.format_id}+bestaudio[ext=m4a]/${f.format_id}+bestaudio/best[ext=mp4]/best`
+        : f.format_id;
+
       return `
-      <button class="format-btn" data-format-id="${escapeHtml(f.format_id)}" data-mode="${f.ext === "mp3" ? "mp3" : "mp4"}">
+      <button class="format-btn"
+        data-format-id="${escapeHtml(safeFormatId)}"
+        data-mode="${f.ext === "mp3" ? "mp3" : "mp4"}">
         <span class="format-label">
           <span class="format-badge ${badgeClass(f.ext)}">${f.ext.toUpperCase()}</span>
           <span class="format-resolution">${escapeHtml(label)}</span>

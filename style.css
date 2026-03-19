@@ -170,18 +170,18 @@ h1 {
 }
 
 #analyzeBtn.enabled {
-  /* ENABLED — prata viva */
-  background: #c0c0c0;
-  color: #000;
-  border-color: #c0c0c0;
+  /* ENABLED — vermelho vivo */
+  background: #c0392b;
+  color: #fff;
+  border-color: #c0392b;
   cursor: pointer;
 }
 
 #analyzeBtn.enabled:hover {
   background: #000;
-  color: #e0e0e0;
-  border-color: #e0e0e0;
-  box-shadow: 0 0 10px rgba(200,200,200,0.2);
+  color: #e05040;
+  border-color: #e05040;
+  box-shadow: 0 0 10px rgba(192,57,43,0.35);
 }
 
 #analyzeBtn:disabled {
